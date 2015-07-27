@@ -1,13 +1,13 @@
 package main
 
 import (
-	"fmt"
 	"flag"
+	"fmt"
 	"regexp"
 
+	"github.com/BurntSushi/toml"
 	"github.com/headzoo/surf"
 	"github.com/xconstruct/go-pushbullet"
-	"github.com/BurntSushi/toml"
 )
 
 const Endpoint = "http://app.ip.bn765.com/app/index.php/mypage"
@@ -22,8 +22,8 @@ type MyLink struct {
 }
 
 type Config struct {
-    Email string `toml:"email"`
-    Password string `toml:"password"`
+	Email           string `toml:"email"`
+	Password        string `toml:"password"`
 	PushBulletToken string `toml:"pb-token"`
 }
 
@@ -33,16 +33,17 @@ func pushNotify(token string, title string, body string) error {
 
 	link := MyLink{
 		Email: user.Email,
-		Type: "link",
+		Type:  "link",
 		Title: title,
-		URL: Endpoint,
-		Body: body,
+		URL:   Endpoint,
+		Body:  body,
 	}
 	return pb.Push("/pushes", link)
 }
 
 func main() {
 	var configFile *string = flag.String("config", "config.toml", "path to config")
+	var silent *bool = flag.Bool("silent", false, "don't output")
 	flag.Parse()
 
 	var config Config
@@ -81,9 +82,11 @@ func main() {
 
 	theater, _ := bw.Find("div.appeal-theater").Html()
 	if theater != "" {
-		fmt.Println("send theater notify")
+		if !*silent {
+			fmt.Println("send theater notify")
+		}
 		err = pushNotify(config.PushBulletToken,
-		                 "ライブ開催可能", "劇場でライブ開催が可能になりました") 
+			"ライブ開催可能", "劇場でライブ開催が可能になりました")
 		if err != nil {
 			panic(err)
 		}
@@ -91,7 +94,9 @@ func main() {
 
 	caravan, _ := bw.Find("div.appeal-caravan").Html()
 	if caravan != "" {
-		fmt.Println("send caravan notify")
+		if !*silent {
+			fmt.Println("send caravan notify")
+		}
 		err = pushNotify(config.PushBulletToken, "お仕事完了", "キャラバンのお仕事が完了しています")
 		if err != nil {
 			panic(err)
@@ -101,9 +106,11 @@ func main() {
 	re, _ = regexp.Compile("(\\d+)/5")
 	matchs = re.FindSubmatch([]byte(bw.Find("li.bp-container div").Text()))
 	if string(matchs[1]) == "5" {
-		fmt.Println("BP is full tank")
+		if !*silent {
+			fmt.Println("BP is full tank")
+		}
 		err = pushNotify(config.PushBulletToken,
-		                 "BP回復完了", "BPが満タン(5)になりました。フェス回しましょう")
+			"BP回復完了", "BPが満タン(5)になりました。フェス回しましょう")
 		if err != nil {
 			panic(err)
 		}
