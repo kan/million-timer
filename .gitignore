@@ -23,5 +23,6 @@ _testmain.go
 *.test
 *.prof
 
+build/
 config.toml
 million-timer
