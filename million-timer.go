@@ -42,8 +42,8 @@ func pushNotify(token string, title string, body string) error {
 }
 
 func main() {
-	var configFile *string = flag.String("config", "config.toml", "path to config")
-	var silent *bool = flag.Bool("silent", false, "don't output")
+	var configFile = flag.String("config", "config.toml", "path to config")
+	var silent = flag.Bool("silent", false, "don't output")
 	flag.Parse()
 
 	var config Config
