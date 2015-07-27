@@ -152,7 +152,7 @@ func main() {
 		panic(err)
 	}
 
-	hitokoto, _ := bw.Find("div#mood-send-reward div.mood-send-btn").Html()
+	hitokoto, _ := bw.Find("div#mood-send-reward div.mood-send-btn a").Html()
 	if hitokoto != "" {
 		if !*silent {
 			fmt.Println("hitokoto can send")
