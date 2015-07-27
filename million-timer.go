@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"flag"
 	"regexp"
 
 	"github.com/headzoo/surf"
@@ -41,8 +42,11 @@ func pushNotify(token string, title string, body string) error {
 }
 
 func main() {
+	var configFile *string = flag.String("config", "config.toml", "path to config")
+	flag.Parse()
+
 	var config Config
-	_, err := toml.DecodeFile("config.toml", &config)
+	_, err := toml.DecodeFile(*configFile, &config)
 	if err != nil {
 		panic(err)
 	}
