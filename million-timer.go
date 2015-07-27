@@ -41,10 +41,18 @@ func pushNotify(token string, title string, body string) error {
 	return pb.Push("/pushes", link)
 }
 
+var version string
+
 func main() {
 	var configFile = flag.String("config", "config.toml", "path to config")
 	var silent = flag.Bool("silent", false, "don't output")
+	var showVersion = flag.Bool("version", false, "show version")
 	flag.Parse()
+
+	if *showVersion {
+		fmt.Printf("%s\n", version)
+		return
+	}
 
 	var config Config
 	_, err := toml.DecodeFile(*configFile, &config)
