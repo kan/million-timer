@@ -115,4 +115,17 @@ func main() {
 			panic(err)
 		}
 	}
+
+	re, _ = regexp.Compile("(\\d+)/(\\d+)")
+	matchs = re.FindSubmatch([]byte(bw.Find("li.ap-container div").Text()))
+	if string(matchs[1]) == string(matchs[2]) {
+		if !*silent {
+			fmt.Println("AP is full tank")
+		}
+		err = pushNotify(config.PushBulletToken,
+			"元気回復完了", "元気が全快しました。営業しましょう")
+		if err != nil {
+			panic(err)
+		}
+	}
 }
