@@ -67,7 +67,7 @@ func main() {
 		panic(err)
 	}
 
-	re, _ := regexp.Compile("var url = \"([^\"]+)\";")
+	re := regexp.MustCompile(`var url = "([^"]+)";`)
 	matchs := re.FindSubmatch([]byte(bw.Find("script").Text()))
 	err = bw.Open(string(matchs[1]))
 	if err != nil {
@@ -103,29 +103,33 @@ func main() {
 		}
 	}
 
-	re, _ = regexp.Compile("(\\d+)/5")
+	re = regexp.MustCompile(`(\d+)/5`)
 	matchs = re.FindSubmatch([]byte(bw.Find("li.bp-container div").Text()))
-	if string(matchs[1]) == "5" {
-		if !*silent {
-			fmt.Println("BP is full tank")
-		}
-		err = pushNotify(config.PushBulletToken,
-			"BP回復完了", "BPが満タン(5)になりました。フェス回しましょう")
-		if err != nil {
-			panic(err)
+	if len(matchs) == 2 {
+		if string(matchs[1]) == "5" {
+			if !*silent {
+				fmt.Println("BP is full tank")
+			}
+			err = pushNotify(config.PushBulletToken,
+				"BP回復完了", "BPが満タン(5)になりました。フェス回しましょう")
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 
-	re, _ = regexp.Compile("(\\d+)/(\\d+)")
+	re = regexp.MustCompile(`(\d+)/(\d+)`)
 	matchs = re.FindSubmatch([]byte(bw.Find("li.ap-container div").Text()))
-	if string(matchs[1]) == string(matchs[2]) {
-		if !*silent {
-			fmt.Println("AP is full tank")
-		}
-		err = pushNotify(config.PushBulletToken,
-			"元気回復完了", "元気が全快しました。営業しましょう")
-		if err != nil {
-			panic(err)
+	if len(matchs) == 3 {
+		if string(matchs[1]) == string(matchs[2]) {
+			if !*silent {
+				fmt.Println("AP is full tank")
+			}
+			err = pushNotify(config.PushBulletToken,
+				"元気回復完了", "元気が全快しました。営業しましょう")
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 }
