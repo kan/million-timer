@@ -10,7 +10,7 @@ import (
 	"github.com/xconstruct/go-pushbullet"
 )
 
-const Endpoint = "http://app.ip.bn765.com/app/index.php/mypage"
+const Endpoint = "http://app.ip.bn765.com/app/index.php"
 const UserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 8_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12D508 Safari/600.1.4"
 
 type MyLink struct {
@@ -35,7 +35,7 @@ func pushNotify(token string, title string, body string) error {
 		Email: user.Email,
 		Type:  "link",
 		Title: title,
-		URL:   Endpoint,
+		URL:   Endpoint + "/mypage",
 		Body:  body,
 	}
 	return pb.Push("/pushes", link)
@@ -62,7 +62,7 @@ func main() {
 
 	bw := surf.NewBrowser()
 	bw.SetUserAgent(UserAgent)
-	err = bw.Open(Endpoint)
+	err = bw.Open(Endpoint + "/mypage")
 	if err != nil {
 		panic(err)
 	}
@@ -138,6 +138,29 @@ func main() {
 			if err != nil {
 				panic(err)
 			}
+		}
+	}
+
+	err = bw.Open(Endpoint + "/event")
+	if err != nil {
+		panic(err)
+	}
+
+	fm, _ = bw.Form("form")
+	err = fm.Submit()
+	if err != nil {
+		panic(err)
+	}
+
+	hitokoto, _ := bw.Find("div#mood-send-reward div.mood-send-btn").Html()
+	if hitokoto != "" {
+		if !*silent {
+			fmt.Println("hitokoto can send")
+		}
+		err = pushNotify(config.PushBulletToken,
+			"ひとこと送信できます", "ひとこと送信して報酬ゲット")
+		if err != nil {
+			panic(err)
 		}
 	}
 }
