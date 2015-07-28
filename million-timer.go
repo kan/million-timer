@@ -8,38 +8,15 @@ import (
 
 	"github.com/BurntSushi/toml"
 	"github.com/headzoo/surf"
-	"github.com/xconstruct/go-pushbullet"
 )
 
-const Endpoint = "http://app.ip.bn765.com/app/index.php"
-const UserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 8_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12D508 Safari/600.1.4"
+const endpoint = "http://app.ip.bn765.com/app/index.php"
+const userAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 8_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12D508 Safari/600.1.4"
 
-type MyLink struct {
-	Email string `json:"email"`
-	Type  string `json:"type"`
-	Title string `json:"title"`
-	URL   string `json:"url"`
-	Body  string `json:"body,omitempty"`
-}
-
-type Config struct {
+type appConfig struct {
 	Email           string `toml:"email"`
 	Password        string `toml:"password"`
 	PushBulletToken string `toml:"pb-token"`
-}
-
-func pushNotify(token string, title string, body string) error {
-	pb := pushbullet.New(token)
-	user, _ := pb.Me()
-
-	link := MyLink{
-		Email: user.Email,
-		Type:  "link",
-		Title: title,
-		URL:   Endpoint + "/mypage",
-		Body:  body,
-	}
-	return pb.Push("/pushes", link)
 }
 
 var version string
@@ -55,15 +32,15 @@ func main() {
 		return
 	}
 
-	var config Config
+	var config appConfig
 	_, err := toml.DecodeFile(*configFile, &config)
 	if err != nil {
 		panic(err)
 	}
 
 	bw := surf.NewBrowser()
-	bw.SetUserAgent(UserAgent)
-	err = bw.Open(Endpoint + "/mypage")
+	bw.SetUserAgent(userAgent)
+	err = bw.Open(endpoint + "/mypage")
 	if err != nil {
 		panic(err)
 	}
@@ -116,7 +93,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = bw.Open(Endpoint + "/event")
+	err = bw.Open(endpoint + "/event")
 	if err != nil {
 		panic(err)
 	}

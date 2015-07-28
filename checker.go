@@ -35,7 +35,7 @@ func (self *Checker) pushNotify(title string, body string) error {
 		Email: self.Target.Email,
 		Type:  "link",
 		Title: title,
-		URL:   Endpoint + "/mypage",
+		URL:   endpoint + "/mypage",
 		Body:  body,
 	}
 	return self.PBClient.Push("/pushes", link)
