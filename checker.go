@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"regexp"
 	"time"
 
+	"github.com/bitly/go-simplejson"
 	"github.com/headzoo/surf/browser"
 	"github.com/xconstruct/go-pushbullet"
 )
@@ -14,6 +16,7 @@ type Checker struct {
 	PBClient *pushbullet.Client
 	Target   *pushbullet.User
 	Silent   bool
+	Cache    *simplejson.Json
 }
 
 type pbLink struct {
@@ -28,8 +31,29 @@ type pbLink struct {
 func NewChecker(token string, s bool) *Checker {
 	pb := pushbullet.New(token)
 	user, _ := pb.Me()
-	checker := &Checker{PBClient: pb, Target: user, Silent: s}
+
+	var r *os.File
+	_, err := os.Stat(".million-timer")
+	if err == nil {
+		r, _ = os.Open(".million-timer")
+	} else {
+		r, _ = os.Create(".million-timer")
+	}
+	c, err := simplejson.NewFromReader(r)
+	if err != nil {
+		c = simplejson.New()
+	}
+
+	checker := &Checker{PBClient: pb, Target: user, Silent: s, Cache: c}
+
 	return checker
+}
+
+func (c *Checker) Close() {
+	w, _ := os.Create(".million-timer")
+	defer w.Close()
+	b, _ := c.Cache.EncodePretty()
+	w.Write(b)
 }
 
 func (c *Checker) pushNotify(title string, body string) error {
@@ -47,10 +71,16 @@ func (c *Checker) pushNotify(title string, body string) error {
 func (c *Checker) CheckElement(bw *browser.Browser, s, msg, title, body string) error {
 	html, _ := bw.Find(s).Html()
 	if html != "" {
-		if !c.Silent {
-			fmt.Println(msg)
+		flg := c.Cache.Get("CheckElement:" + s).MustBool(false)
+		if !flg {
+			if !c.Silent {
+				fmt.Println(msg)
+			}
+			c.Cache.Set("CheckElement:"+s, true)
+			return c.pushNotify(title, body)
 		}
-		return c.pushNotify(title, body)
+	} else {
+		c.Cache.Del("CheckElement:" + s)
 	}
 	return nil
 }
@@ -59,10 +89,16 @@ func (c *Checker) checkTextCore(bw *browser.Browser, r *regexp.Regexp, f func(m 
 	matchs := r.FindSubmatch([]byte(bw.Find(s).Text()))
 	if len(matchs) == 3 {
 		if f(matchs) {
-			if !c.Silent {
-				fmt.Println(msg)
+			flg := c.Cache.Get("CheckText:" + s + r.String()).MustBool(false)
+			if !flg {
+				if !c.Silent {
+					fmt.Println(msg)
+				}
+				c.Cache.Set("CheckText:"+s+r.String(), true)
+				return c.pushNotify(title, body)
 			}
-			return c.pushNotify(title, body)
+		} else {
+			c.Cache.Del("CheckText:" + s + r.String())
 		}
 	}
 	return nil

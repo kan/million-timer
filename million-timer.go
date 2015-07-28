@@ -67,6 +67,7 @@ func main() {
 	}
 
 	checker := NewChecker(config.PushBulletToken, *silent)
+	defer checker.Close()
 
 	err = checker.CheckElement(bw, "div.appeal-theater", "send theater notify",
 		"ライブ開催可能", "劇場でライブ開催が可能になりました")

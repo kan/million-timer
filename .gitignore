@@ -26,3 +26,4 @@ _testmain.go
 build/
 config.toml
 million-timer
+.million-timer
