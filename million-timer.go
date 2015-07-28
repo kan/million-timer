@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"regexp"
+	"time"
 
 	"github.com/BurntSushi/toml"
 	"github.com/headzoo/surf"
@@ -161,6 +162,21 @@ func main() {
 			"ひとこと送信できます", "ひとこと送信して報酬ゲット")
 		if err != nil {
 			panic(err)
+		}
+	}
+
+	re = regexp.MustCompile(`本日の報酬 (\d+) / (\d+)`)
+	matchs = re.FindSubmatch([]byte(bw.Find("div#daily_point_reward span.m-pl").Text()))
+	if len(matchs) == 3 {
+		if string(matchs[1]) != string(matchs[2]) && time.Now().Hour() == 23 {
+			if !*silent {
+				fmt.Println("daily point unachieved")
+			}
+			err = pushNotify(config.PushBulletToken,
+				"デイリー報酬未達", "まだ今日のデイリー達成してないですよ。急いで!")
+			if err != nil {
+				panic(err)
+			}
 		}
 	}
 }
