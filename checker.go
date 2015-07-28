@@ -49,6 +49,7 @@ func NewChecker(token string, s bool) *Checker {
 	return checker
 }
 
+// Close closes the Checker
 func (c *Checker) Close() {
 	w, _ := os.Create(".million-timer")
 	defer w.Close()
