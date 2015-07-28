@@ -9,6 +9,7 @@ import (
 	"github.com/xconstruct/go-pushbullet"
 )
 
+// Checker holds the settings for the checker of the millon-timer
 type Checker struct {
 	PBClient *pushbullet.Client
 	Target   *pushbullet.User
@@ -23,6 +24,7 @@ type pbLink struct {
 	Body  string `json:"body,omitempty"`
 }
 
+// NewChecker is generator for Checker
 func NewChecker(token string, s bool) *Checker {
 	pb := pushbullet.New(token)
 	user, _ := pb.Me()
@@ -30,48 +32,51 @@ func NewChecker(token string, s bool) *Checker {
 	return checker
 }
 
-func (self *Checker) pushNotify(title string, body string) error {
+func (c *Checker) pushNotify(title string, body string) error {
 	link := pbLink{
-		Email: self.Target.Email,
+		Email: c.Target.Email,
 		Type:  "link",
 		Title: title,
 		URL:   endpoint + "/mypage",
 		Body:  body,
 	}
-	return self.PBClient.Push("/pushes", link)
+	return c.PBClient.Push("/pushes", link)
 }
 
-func (self *Checker) CheckElement(bw *browser.Browser, s, msg, title, body string) error {
+// CheckElement is checks whether the specified selector is present in the corresponding page
+func (c *Checker) CheckElement(bw *browser.Browser, s, msg, title, body string) error {
 	html, _ := bw.Find(s).Html()
 	if html != "" {
-		if !self.Silent {
+		if !c.Silent {
 			fmt.Println(msg)
 		}
-		return self.pushNotify(title, body)
+		return c.pushNotify(title, body)
 	}
 	return nil
 }
 
-func (self *Checker) checkTextCore(bw *browser.Browser, r *regexp.Regexp, f func(m [][]byte) bool, s, msg, title, body string) error {
+func (c *Checker) checkTextCore(bw *browser.Browser, r *regexp.Regexp, f func(m [][]byte) bool, s, msg, title, body string) error {
 	matchs := r.FindSubmatch([]byte(bw.Find(s).Text()))
 	if len(matchs) == 3 {
 		if f(matchs) {
-			if !self.Silent {
+			if !c.Silent {
 				fmt.Println(msg)
 			}
-			return self.pushNotify(title, body)
+			return c.pushNotify(title, body)
 		}
 	}
 	return nil
 }
 
-func (self *Checker) CheckText(bw *browser.Browser, r *regexp.Regexp, s, msg, title, body string) error {
-	return self.checkTextCore(bw, r, func(m [][]byte) bool { return string(m[1]) == string(m[2]) },
+// CheckText compares retrieves the value by regular expression from the text in the specified selector
+func (c *Checker) CheckText(bw *browser.Browser, r *regexp.Regexp, s, msg, title, body string) error {
+	return c.checkTextCore(bw, r, func(m [][]byte) bool { return string(m[1]) == string(m[2]) },
 		s, msg, title, body)
 }
 
-func (self *Checker) CheckTextAt(bw *browser.Browser, r *regexp.Regexp, hour int, s, msg, title, body string) error {
-	return self.checkTextCore(bw, r,
+// CheckTextAt compares retrieves the value by regular expression from the text in the specified selector
+func (c *Checker) CheckTextAt(bw *browser.Browser, r *regexp.Regexp, hour int, s, msg, title, body string) error {
+	return c.checkTextCore(bw, r,
 		func(m [][]byte) bool { return string(m[1]) != string(m[2]) && time.Now().Hour() == hour },
 		s, msg, title, body)
 }
