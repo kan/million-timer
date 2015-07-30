@@ -19,7 +19,7 @@ type appConfig struct {
 	PushBulletToken string `toml:"pb-token"`
 }
 
-var version string
+var VERSION string
 
 func main() {
 	var configFile = flag.String("config", "config.toml", "path to config")
@@ -28,7 +28,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Printf("%s\n", version)
+		fmt.Printf("%s\n", VERSION)
 		return
 	}
 
