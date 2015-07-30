@@ -19,6 +19,7 @@ type appConfig struct {
 	PushBulletToken string `toml:"pb-token"`
 }
 
+// package version
 var VERSION string
 
 func main() {
@@ -90,6 +91,11 @@ func main() {
 
 	err = checker.CheckText(bw, re, "li.ap-container div", "AP is full tank",
 		"元気回復完了", "元気が全快しました。営業しましょう")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = checker.CheckPopup(bw)
 	if err != nil {
 		log.Fatal(err)
 	}

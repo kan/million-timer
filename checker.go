@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"time"
 
+	"github.com/PuerkitoBio/goquery"
 	"github.com/bitly/go-simplejson"
 	"github.com/headzoo/surf/browser"
 	"github.com/xconstruct/go-pushbullet"
@@ -83,6 +84,41 @@ func (c *Checker) CheckElement(bw *browser.Browser, s, msg, title, body string) 
 	} else {
 		c.Cache.Del("CheckElement:" + s)
 	}
+	return nil
+}
+
+// CheckPopup is checks popup list
+func (c *Checker) CheckPopup(bw *browser.Browser) error {
+	n := false
+	info := ""
+	m := c.Cache.Get("CheckPopup").MustMap(make(map[string]interface{}))
+
+	bw.Find("div#main-img div#popup ul li a").Each(func(_ int, s *goquery.Selection) {
+		t := s.Text()
+		if t == "合同フェスへの参加要請が届いています" {
+			return
+		}
+		n = true
+		_, ok := m[t]
+		if ok {
+			return
+		}
+		if !c.Silent {
+			fmt.Println("new info: " + t)
+		}
+		info = info + t + "\n"
+		m[t] = 1
+	})
+
+	if n {
+		c.Cache.Set("CheckPopup", m)
+		if info != "" {
+			c.pushNotify("未読のお知らせがあります", info)
+		}
+	} else {
+		c.Cache.Del("CheckPopup")
+	}
+
 	return nil
 }
 
