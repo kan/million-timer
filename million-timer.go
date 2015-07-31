@@ -7,11 +7,7 @@ import (
 	"regexp"
 
 	"github.com/BurntSushi/toml"
-	"github.com/headzoo/surf"
 )
-
-const endpoint = "http://app.ip.bn765.com/app/index.php"
-const userAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 8_2 like Mac OS X) AppleWebKit/600.1.4 (KHTML, like Gecko) Version/8.0 Mobile/12D508 Safari/600.1.4"
 
 type appConfig struct {
 	Email           string `toml:"email"`
@@ -39,33 +35,8 @@ func main() {
 		panic(err)
 	}
 
-	bw := surf.NewBrowser()
-	bw.SetUserAgent(userAgent)
-	err = bw.Open(endpoint + "/mypage")
-	if err != nil {
-		panic(err)
-	}
-
-	fm, _ := bw.Form("form#login")
-	fm.Input("mail", config.Email)
-	fm.Input("user_password", config.Password)
-	err = fm.Submit()
-	if err != nil {
-		panic(err)
-	}
-
-	re := regexp.MustCompile(`var url = "([^"]+)";`)
-	matchs := re.FindSubmatch([]byte(bw.Find("script").Text()))
-	err = bw.Open(string(matchs[1]))
-	if err != nil {
-		panic(err)
-	}
-
-	fm, _ = bw.Form("form")
-	err = fm.Submit()
-	if err != nil {
-		panic(err)
-	}
+	bw := NewBrowser(config.Email, config.Password)
+	bw.Open("/mypage")
 
 	checker := NewChecker(config.PushBulletToken, *silent)
 	defer checker.Close()
@@ -82,7 +53,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	re = regexp.MustCompile(`(\d+)/(\d+)`)
+	re := regexp.MustCompile(`(\d+)/(\d+)`)
 	err = checker.CheckText(bw, re, "li.bp-container div", "BP is full tank",
 		"BP回復完了", "BPが満タン(5)になりました。フェス回しましょう")
 	if err != nil {
@@ -100,13 +71,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	err = bw.Open(endpoint + "/event")
-	if err != nil {
-		panic(err)
-	}
-
-	fm, _ = bw.Form("form")
-	err = fm.Submit()
+	err = bw.Open("/event")
 	if err != nil {
 		panic(err)
 	}

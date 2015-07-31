@@ -8,7 +8,6 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/bitly/go-simplejson"
-	"github.com/headzoo/surf/browser"
 	"github.com/xconstruct/go-pushbullet"
 )
 
@@ -70,7 +69,7 @@ func (c *Checker) pushNotify(title string, body string) error {
 }
 
 // CheckElement is checks whether the specified selector is present in the corresponding page
-func (c *Checker) CheckElement(bw *browser.Browser, s, msg, title, body string) error {
+func (c *Checker) CheckElement(bw *Browser, s, msg, title, body string) error {
 	html, _ := bw.Find(s).Html()
 	if html != "" {
 		flg := c.Cache.Get("CheckElement:" + s).MustBool(false)
@@ -88,7 +87,7 @@ func (c *Checker) CheckElement(bw *browser.Browser, s, msg, title, body string) 
 }
 
 // CheckPopup is checks popup list
-func (c *Checker) CheckPopup(bw *browser.Browser) error {
+func (c *Checker) CheckPopup(bw *Browser) error {
 	n := false
 	info := ""
 	m := c.Cache.Get("CheckPopup").MustMap(make(map[string]interface{}))
@@ -122,7 +121,7 @@ func (c *Checker) CheckPopup(bw *browser.Browser) error {
 	return nil
 }
 
-func (c *Checker) checkTextCore(bw *browser.Browser, r *regexp.Regexp, f func(m [][]byte) bool, s, msg, title, body string) error {
+func (c *Checker) checkTextCore(bw *Browser, r *regexp.Regexp, f func(m [][]byte) bool, s, msg, title, body string) error {
 	matchs := r.FindSubmatch([]byte(bw.Find(s).Text()))
 	if len(matchs) == 3 {
 		if f(matchs) {
@@ -142,13 +141,13 @@ func (c *Checker) checkTextCore(bw *browser.Browser, r *regexp.Regexp, f func(m 
 }
 
 // CheckText compares retrieves the value by regular expression from the text in the specified selector
-func (c *Checker) CheckText(bw *browser.Browser, r *regexp.Regexp, s, msg, title, body string) error {
+func (c *Checker) CheckText(bw *Browser, r *regexp.Regexp, s, msg, title, body string) error {
 	return c.checkTextCore(bw, r, func(m [][]byte) bool { return string(m[1]) == string(m[2]) },
 		s, msg, title, body)
 }
 
 // CheckTextAt compares retrieves the value by regular expression from the text in the specified selector
-func (c *Checker) CheckTextAt(bw *browser.Browser, r *regexp.Regexp, hour int, s, msg, title, body string) error {
+func (c *Checker) CheckTextAt(bw *Browser, r *regexp.Regexp, hour int, s, msg, title, body string) error {
 	return c.checkTextCore(bw, r,
 		func(m [][]byte) bool { return string(m[1]) != string(m[2]) && time.Now().Hour() == hour },
 		s, msg, title, body)
