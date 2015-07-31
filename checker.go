@@ -121,6 +121,37 @@ func (c *Checker) CheckPopup(bw *Browser) error {
 	return nil
 }
 
+// CheckFes is checks fes
+func (c *Checker) CheckFes(bw *Browser) error {
+	flg := false
+
+	checker := func() {
+		bw.Find("ul.list-bg li table dd.txt-ngtv").Each(func(_ int, s *goquery.Selection) {
+			t, _ := time.Parse("15:04:05", s.Text())
+			if t.Minute() <= 10 {
+				flg = true
+			}
+		})
+	}
+
+	for _, path := range []string{"/fes/event_multi_list","/fes/event_list","/fes"} {
+		err := bw.Open(path)
+		if err != nil {
+			return err
+		}
+		checker()
+	}
+
+	if flg {
+		if !c.Silent {
+			fmt.Println("exist near the end of fes")
+		}
+		c.pushNotify("終了目前のフェスがあります", "勿体ないので処理しましょう")
+	}
+
+	return nil
+}
+
 func (c *Checker) checkTextCore(bw *Browser, r *regexp.Regexp, f func(m [][]byte) bool, s, msg, title, body string) error {
 	matchs := r.FindSubmatch([]byte(bw.Find(s).Text()))
 	if len(matchs) == 3 {

@@ -88,4 +88,9 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	err = checker.CheckFes(bw)
+	if err != nil {
+		log.Fatal(err)
+	}
 }
