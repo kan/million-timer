@@ -15,9 +15,17 @@ import (
 // Checker holds the settings for the checker of the millon-timer
 type Checker struct {
 	PBClient *pushbullet.Client
+	Config   CheckerConfig
 	Target   *pushbullet.User
 	Silent   bool
 	Cache    *simplejson.Json
+}
+
+// CheckerConfig is setting of Checker
+type CheckerConfig struct {
+	PushBulletToken string `toml:"pb-token"`
+	DailyRewardHour int    `toml:"daily_reward_hour"`
+	FesTimeLeftMin  int    `toml:"fes_time_left_min"`
 }
 
 type pbLink struct {
@@ -29,8 +37,8 @@ type pbLink struct {
 }
 
 // NewChecker is generator for Checker
-func NewChecker(token string, s bool) *Checker {
-	pb := pushbullet.New(token)
+func NewChecker(config CheckerConfig, s bool) *Checker {
+	pb := pushbullet.New(config.PushBulletToken)
 	user, _ := pb.Me()
 
 	var r *os.File
@@ -45,7 +53,7 @@ func NewChecker(token string, s bool) *Checker {
 		c = simplejson.New()
 	}
 
-	checker := &Checker{PBClient: pb, Target: user, Silent: s, Cache: c}
+	checker := &Checker{PBClient: pb, Target: user, Silent: s, Config: config, Cache: c}
 
 	return checker
 }
@@ -131,7 +139,7 @@ func (c *Checker) CheckFes(bw *Browser) error {
 			html, _ := s.Find("div.fes-li-enemy div.fes-li-label-area").Html()
 			if strings.Contains(html, "http://m.ip.bn765.com/1100b9af30c4c51d0b") {
 				t, _ := time.Parse("15:04:05", s.Find("table dd.txt-ngtv").Text())
-				if t.Minute() <= 10 {
+				if t.Minute() <= c.Config.FesTimeLeftMin {
 					flg = true
 				}
 			}
@@ -181,9 +189,11 @@ func (c *Checker) CheckText(bw *Browser, r *regexp.Regexp, s, msg, title, body s
 		s, msg, title, body)
 }
 
-// CheckTextAt compares retrieves the value by regular expression from the text in the specified selector
-func (c *Checker) CheckTextAt(bw *Browser, r *regexp.Regexp, hour int, s, msg, title, body string) error {
+// CheckTextDailyReward compares retrieves the value by regular expression from the text in the specified selector
+func (c *Checker) CheckTextDailyReward(bw *Browser, r *regexp.Regexp, s, msg, title, body string) error {
 	return c.checkTextCore(bw, r,
-		func(m [][]byte) bool { return string(m[1]) != string(m[2]) && time.Now().Hour() == hour },
+		func(m [][]byte) bool {
+			return string(m[1]) != string(m[2]) && time.Now().Hour() == c.Config.DailyRewardHour
+		},
 		s, msg, title, body)
 }

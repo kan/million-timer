@@ -1,3 +1,7 @@
 email = "your gree account (email)"
 password = "your gree password"
+
+[checker]
 pb-token = "pushbullet API token"
+daily_reward_hour = 23
+fes_time_left_min = 10

@@ -10,9 +10,9 @@ import (
 )
 
 type appConfig struct {
-	Email           string `toml:"email"`
-	Password        string `toml:"password"`
-	PushBulletToken string `toml:"pb-token"`
+	Email          string        `toml:"email"`
+	Password       string        `toml:"password"`
+	CheckerSetting CheckerConfig `toml:"checker"`
 }
 
 // package version
@@ -38,7 +38,7 @@ func main() {
 	bw := NewBrowser(config.Email, config.Password)
 	bw.Open("/mypage")
 
-	checker := NewChecker(config.PushBulletToken, *silent)
+	checker := NewChecker(config.CheckerSetting, *silent)
 	defer checker.Close()
 
 	err = checker.CheckElement(bw, "div.appeal-theater", "send theater notify",
@@ -83,7 +83,8 @@ func main() {
 	}
 
 	re = regexp.MustCompile(`本日の報酬 (\d+) / (\d+)`)
-	err = checker.CheckTextAt(bw, re, 23, "div#daily_point_reward span.m-pl", "daily point unachieved",
+	err = checker.CheckTextDailyReward(bw, re,
+		"div#daily_point_reward span.m-pl", "daily point unachieved",
 		"デイリー報酬未達", "まだ今日のデイリー達成してないですよ。急いで!")
 	if err != nil {
 		log.Fatal(err)
