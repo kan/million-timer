@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
@@ -126,15 +127,18 @@ func (c *Checker) CheckFes(bw *Browser) error {
 	flg := false
 
 	checker := func() {
-		bw.Find("ul.list-bg li table dd.txt-ngtv").Each(func(_ int, s *goquery.Selection) {
-			t, _ := time.Parse("15:04:05", s.Text())
-			if t.Minute() <= 10 {
-				flg = true
+		bw.Find("ul.list-bg li").Each(func(_ int, s *goquery.Selection) {
+			html, _ := s.Find("div.fes-li-enemy div.fes-li-label-area").Html()
+			if strings.Contains(html, "http://m.ip.bn765.com/1100b9af30c4c51d0b") {
+				t, _ := time.Parse("15:04:05", s.Find("table dd.txt-ngtv").Text())
+				if t.Minute() <= 10 {
+					flg = true
+				}
 			}
 		})
 	}
 
-	for _, path := range []string{"/fes/event_multi_list","/fes/event_list","/fes"} {
+	for _, path := range []string{"/fes/event_multi_list", "/fes/event_list", "/fes"} {
 		err := bw.Open(path)
 		if err != nil {
 			return err
