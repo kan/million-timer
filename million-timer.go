@@ -4,7 +4,9 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"os"
 	"regexp"
+	"strings"
 
 	"github.com/BurntSushi/toml"
 )
@@ -17,6 +19,20 @@ type appConfig struct {
 
 // package version
 var VERSION string
+
+func genConfig(file string) {
+	config := &appConfig{
+		Email: "your gree email", Password: "your gree password", CheckerSetting: CheckerConfig{
+		PushBulletToken: "your pushbullet token", DailyRewardHour: 23, FesTimeLeftMin: 10}}
+	f, _ := os.Create(file)
+	encoder := toml.NewEncoder(f)
+	err := encoder.Encode(config)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("can't find %s. generate sample config.\n", file)
+	fmt.Printf("please edit %s. And rerun\n", file)
+}
 
 func main() {
 	var configFile = flag.String("config", "config.toml", "path to config")
@@ -32,6 +48,10 @@ func main() {
 	var config appConfig
 	_, err := toml.DecodeFile(*configFile, &config)
 	if err != nil {
+		if strings.Contains(err.Error(), "no such file or directory") {
+			genConfig(*configFile)
+			return
+		}
 		panic(err)
 	}
 

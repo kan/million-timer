@@ -4,9 +4,26 @@
 
 ## 使い方
 
-* go buildしてバイナリを作るか`go run million-timer.go`で実行
-* `cp config.toml.sample config.toml`して、config.tomlの必要項目を埋める
+* [releases](https://github.com/kan/million-timer/releases)から自分の環境向けのバイナリを取得
+* `./million-timer`を実行すると設定ファイル"config.toml"の雛形が作られる
+* config.tomlを編集して必要項目を埋める
 * 必要に応じてcronとかで回すと良いんじゃないかな
+
+## 実行オプション
+
+詳細は`-help`オプションで
+
+* `-config` 設定ファイルのパスを指定。cronで動かす時向け
+* `-silent` 標準出力にエラー以外吐かなくなる。cronで動かす時向け
+
+## ビルド方法
+
+```sh
+git clone https://github.com/kan/million-timer.git
+cd million-timer
+go get .
+go build
+```
 
 ## 機能
 
@@ -19,3 +36,4 @@
 * イベントのひとこと送信
 * イベントのデイリー報酬未達成
 * 未読のお知らせ
+* 終了間近の合同フェス
