@@ -23,7 +23,7 @@ var VERSION string
 func genConfig(file string) {
 	config := &appConfig{
 		Email: "your gree email", Password: "your gree password", CheckerSetting: CheckerConfig{
-		PushBulletToken: "your pushbullet token", DailyRewardHour: 23, FesTimeLeftMin: 10}}
+			PushBulletToken: "your pushbullet token", DailyRewardHour: 23, FesTimeLeftMin: 10}}
 	f, _ := os.Create(file)
 	encoder := toml.NewEncoder(f)
 	err := encoder.Encode(config)
@@ -111,6 +111,16 @@ func main() {
 	}
 
 	err = checker.CheckFes(bw)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = bw.Open("/birthday")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = checker.CheckBirthday(bw)
 	if err != nil {
 		log.Fatal(err)
 	}

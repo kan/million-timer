@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -196,4 +197,35 @@ func (c *Checker) CheckTextDailyReward(bw *Browser, r *regexp.Regexp, s, msg, ti
 			return string(m[1]) != string(m[2]) && time.Now().Hour() == c.Config.DailyRewardHour
 		},
 		s, msg, title, body)
+}
+
+// CheckBirthday checks birthday's blessing
+func (c *Checker) CheckBirthday(bw *Browser) error {
+	bstr := bw.Find("div.pd-all p:nth-child(2) span.font-ex").Text()
+	blessing, _ := strconv.Atoi(strings.Replace(bstr, ",", "", -1))
+	if blessing >= 30000 {
+		d := c.Cache.Get("CheckBirthday:present").MustString("")
+		if d == time.Now().Format("2006-01-02") {
+			if !c.Silent {
+				fmt.Println("can send birthday present")
+			}
+			c.Cache.Set("CheckBirthday:present", time.Now().Format("2006-01-02"))
+			c.pushNotify("アイドルに誕生日プレゼントを贈れます", "お祝いしてあげましょう")
+		}
+	}
+	html, _ := bw.Find("a.birthday-btn.celebrate").Html()
+	if html != "" {
+		flg := c.Cache.Get("CheckBirthday:bless").MustBool(false)
+		if !flg {
+			if !c.Silent {
+				fmt.Println("can bless birthday")
+			}
+			c.Cache.Set("CheckBirthday:bless", true)
+			c.pushNotify("アイドルの誕生日を祝福できます", "お祝いしてあげましょう")
+		} else {
+			c.Cache.Del("CheckBirthday:bless")
+		}
+	}
+
+	return nil
 }
