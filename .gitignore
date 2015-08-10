@@ -27,3 +27,4 @@ build/
 config.toml
 million-timer
 .million-timer
+.goxc.local.json

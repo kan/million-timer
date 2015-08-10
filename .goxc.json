@@ -1,0 +1,15 @@
+{
+	"Tasks": [
+		"default",
+		"publish-github"
+	],
+	"BuildConstraints": "linux,!arm windows darwin",
+	"PackageVersion": "0.3.0",
+	"TaskSettings": {
+		"publish-github": {
+			"owner": "kan",
+			"repository": "million-timer"
+		}
+	},
+	"ConfigVersion": "0.9"
+}
