@@ -205,7 +205,7 @@ func (c *Checker) CheckBirthday(bw *Browser) error {
 	blessing, _ := strconv.Atoi(strings.Replace(bstr, ",", "", -1))
 	if blessing >= 30000 {
 		d := c.Cache.Get("CheckBirthday:present").MustString("")
-		if d == time.Now().Format("2006-01-02") {
+		if d != time.Now().Format("2006-01-02") {
 			if !c.Silent {
 				fmt.Println("can send birthday present")
 			}
@@ -222,9 +222,9 @@ func (c *Checker) CheckBirthday(bw *Browser) error {
 			}
 			c.Cache.Set("CheckBirthday:bless", true)
 			c.pushNotify("アイドルの誕生日を祝福できます", "お祝いしてあげましょう")
-		} else {
-			c.Cache.Del("CheckBirthday:bless")
 		}
+	} else {
+		c.Cache.Del("CheckBirthday:bless")
 	}
 
 	return nil
