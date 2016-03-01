@@ -110,6 +110,13 @@ func main() {
 		log.Fatal(err)
 	}
 
+	re = regexp.MustCompile(`フィーバーライブ開催中!!`)
+	err = checker.CheckText(bw, re, "div.txt-caution", "fiver live",
+		"フィーバーライブ開催中", "フィーバーライブ開催中です。回しましょう!")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	err = checker.CheckFes(bw)
 	if err != nil {
 		log.Fatal(err)
