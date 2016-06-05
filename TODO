@@ -1,0 +1,7 @@
+- flag管理ライブラリ導入
+-- config.tomlの項目をflag,ENVで上書き可能に
+- web serverモードをdefaultに
+-- TOPは説明文。/checkでchecker起動
+- heroku向けscraper修正
+- 多重チェック防止キャッシュをredisに置けるように
+- heroku button用の設定(Procfile, app.json)
