@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/BurntSushi/toml"
+	"gopkg.in/alecthomas/kingpin.v2"
 )
 
 type appConfig struct {
@@ -34,16 +34,16 @@ func genConfig(file string) {
 	fmt.Printf("please edit %s. And rerun\n", file)
 }
 
-func main() {
-	var configFile = flag.String("config", "config.toml", "path to config")
-	var silent = flag.Bool("silent", false, "don't output")
-	var showVersion = flag.Bool("version", false, "show version")
-	flag.Parse()
+var (
+	configFile  = kingpin.Flag("config", "path to config").Default("config.toml").String()
+	silent      = kingpin.Flag("silent", "don't output").Short('s').Bool()
+)
 
-	if *showVersion {
-		fmt.Printf("%s\n", VERSION)
-		return
-	}
+func main() {
+	kingpin.Version(VERSION)
+	kingpin.CommandLine.VersionFlag.Short('v')
+	kingpin.CommandLine.HelpFlag.Short('h')
+	kingpin.Parse()
 
 	var config appConfig
 	_, err := toml.DecodeFile(*configFile, &config)
