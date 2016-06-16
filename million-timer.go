@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"regexp"
 	"strings"
@@ -35,16 +36,36 @@ func genConfig(file string) {
 }
 
 var (
-	configFile  = kingpin.Flag("config", "path to config").Default("config.toml").String()
-	silent      = kingpin.Flag("silent", "don't output").Short('s').Bool()
+	app         = kingpin.New("million-timer", "checker for IDOL M@STER MillionLIVE")
+
+	web     = app.Command("web", "web server mode")
+	webPort = web.Flag("port", "httpd port").Default("5000").OverrideDefaultFromEnvar("PORT").Short('p').Int()
+
+	checker    = app.Command("check", "checker mode")
+	configFile = checker.Flag("config", "path to config").Default("config.toml").String()
+	silent     = checker.Flag("silent", "don't output").Short('s').Bool()
 )
 
 func main() {
-	kingpin.Version(VERSION)
-	kingpin.CommandLine.VersionFlag.Short('v')
-	kingpin.CommandLine.HelpFlag.Short('h')
-	kingpin.Parse()
+	app.Version(VERSION)
+	app.VersionFlag.Short('v')
+	app.HelpFlag.Short('h')
 
+	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
+	case web.FullCommand():
+		http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+			fmt.Fprintf(w, "Hello")
+		})
+		err := http.ListenAndServe(fmt.Sprintf(":%d", *webPort), nil)
+		if err != nil {
+			panic(err)
+		}
+	case checker.FullCommand():
+		check();
+	}
+}
+
+func check() {
 	var config appConfig
 	_, err := toml.DecodeFile(*configFile, &config)
 	if err != nil {
