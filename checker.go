@@ -2,14 +2,12 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/PuerkitoBio/goquery"
-	"github.com/bitly/go-simplejson"
 	"github.com/xconstruct/go-pushbullet"
 )
 
@@ -19,14 +17,15 @@ type Checker struct {
 	Config   CheckerConfig
 	Target   *pushbullet.User
 	Silent   bool
-	Cache    *simplejson.Json
+	Cache    Cache
 }
 
 // CheckerConfig is setting of Checker
 type CheckerConfig struct {
-	PushBulletToken string `toml:"pb-token"`
-	DailyRewardHour int    `toml:"daily_reward_hour"`
-	FesTimeLeftMin  int    `toml:"fes_time_left_min"`
+	PushBulletToken string
+	DailyRewardHour int
+	FesTimeLeftMin  int
+	RedisURL        string
 }
 
 type pbLink struct {
@@ -42,29 +41,21 @@ func NewChecker(config CheckerConfig, s bool) *Checker {
 	pb := pushbullet.New(config.PushBulletToken)
 	user, _ := pb.Me()
 
-	var r *os.File
-	_, err := os.Stat(".million-timer")
-	if err == nil {
-		r, _ = os.Open(".million-timer")
+	var cache Cache
+	if config.RedisURL != "" {
+		cache = NewCacheRedis(config.RedisURL)
 	} else {
-		r, _ = os.Create(".million-timer")
-	}
-	c, err := simplejson.NewFromReader(r)
-	if err != nil {
-		c = simplejson.New()
+		cache = NewCacheFile()
 	}
 
-	checker := &Checker{PBClient: pb, Target: user, Silent: s, Config: config, Cache: c}
+	checker := &Checker{PBClient: pb, Target: user, Silent: s, Config: config, Cache: cache}
 
 	return checker
 }
 
 // Close closes the Checker
 func (c *Checker) Close() {
-	w, _ := os.Create(".million-timer")
-	defer w.Close()
-	b, _ := c.Cache.EncodePretty()
-	w.Write(b)
+	c.Cache.Close()
 }
 
 func (c *Checker) pushNotify(title string, body string) error {
@@ -82,7 +73,7 @@ func (c *Checker) pushNotify(title string, body string) error {
 func (c *Checker) CheckElement(bw *Browser, s, msg, title, body string) error {
 	html, _ := bw.Find(s).Html()
 	if html != "" {
-		flg := c.Cache.Get("CheckElement:" + s).MustBool(false)
+		flg := c.Cache.GetBool("CheckElement:" + s)
 		if !flg {
 			if !c.Silent {
 				fmt.Println(msg)
@@ -100,7 +91,7 @@ func (c *Checker) CheckElement(bw *Browser, s, msg, title, body string) error {
 func (c *Checker) CheckPopup(bw *Browser) error {
 	n := false
 	info := ""
-	m := c.Cache.Get("CheckPopup").MustMap(make(map[string]interface{}))
+	m := c.Cache.GetMap("CheckPopup")
 
 	bw.Find("div#main-img div#popup ul li a").Each(func(_ int, s *goquery.Selection) {
 		t := s.Text()
@@ -169,7 +160,7 @@ func (c *Checker) checkTextCore(bw *Browser, r *regexp.Regexp, f func(m [][]byte
 	matchs := r.FindSubmatch([]byte(bw.Find(s).Text()))
 	if len(matchs) == 3 {
 		if f(matchs) {
-			flg := c.Cache.Get("CheckText:" + s + r.String()).MustBool(false)
+			flg := c.Cache.GetBool("CheckText:" + s + r.String())
 			if !flg {
 				if !c.Silent {
 					fmt.Println(msg)
@@ -204,7 +195,7 @@ func (c *Checker) CheckBirthday(bw *Browser) error {
 	bstr := bw.Find("div.pd-all p:nth-child(2) span.font-ex").Text()
 	blessing, _ := strconv.Atoi(strings.Replace(bstr, ",", "", -1))
 	if blessing >= 30000 {
-		d := c.Cache.Get("CheckBirthday:present").MustString("")
+		d := c.Cache.GetString("CheckBirthday:present")
 		if d != time.Now().Format("2006-01-02") {
 			if !c.Silent {
 				fmt.Println("can send birthday present")
@@ -215,7 +206,7 @@ func (c *Checker) CheckBirthday(bw *Browser) error {
 	}
 	html, _ := bw.Find("a.birthday-btn.celebrate").Html()
 	if html != "" {
-		flg := c.Cache.Get("CheckBirthday:bless").MustBool(false)
+		flg := c.Cache.GetBool("CheckBirthday:bless")
 		if !flg {
 			if !c.Silent {
 				fmt.Println("can bless birthday")

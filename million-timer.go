@@ -25,6 +25,7 @@ var (
 	chkPBToken         = chk.Flag("token", "your pushbullet token").OverrideDefaultFromEnvar("MT_PB_TOKEN").Required().String()
 	chkDailyRewardHour = chk.Flag("daily-reward-hour", "forget daily reward report hour").Default("23").OverrideDefaultFromEnvar("MT_DAILY_REWARD_HOUR").Int()
 	chkFesTimeLeftMin  = chk.Flag("fes-time-left-min", "report unfinish fes").Default("10").OverrideDefaultFromEnvar("MT_FES_TIME_LEFT_MIN").Int()
+	chkRedisURL        = chk.Flag("redis-url", "redis address").OverrideDefaultFromEnvar("REDISCLOUD_URL").String()
 	chkSilent          = chk.Flag("silent", "don't output").OverrideDefaultFromEnvar("MT_CHECK_SILENT").Short('s').Bool()
 )
 
@@ -52,6 +53,7 @@ func check() {
 		PushBulletToken: *chkPBToken,
 		DailyRewardHour: *chkDailyRewardHour,
 		FesTimeLeftMin:  *chkFesTimeLeftMin,
+		RedisURL:        *chkRedisURL,
 	}
 	bw := NewBrowser(*chkEmail, *chkPassword)
 	err := bw.Open("/mypage")
