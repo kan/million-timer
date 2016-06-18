@@ -24,7 +24,7 @@ _testmain.go
 *.prof
 
 build/
-config.toml
 million-timer
 .million-timer
 .goxc.local.json
+.envrc

@@ -6,44 +6,26 @@ import (
 	"net/http"
 	"os"
 	"regexp"
-	"strings"
 
-	"github.com/BurntSushi/toml"
 	"gopkg.in/alecthomas/kingpin.v2"
 )
-
-type appConfig struct {
-	Email          string        `toml:"email"`
-	Password       string        `toml:"password"`
-	CheckerSetting CheckerConfig `toml:"checker"`
-}
 
 // package version
 var VERSION string
 
-func genConfig(file string) {
-	config := &appConfig{
-		Email: "your gree email", Password: "your gree password", CheckerSetting: CheckerConfig{
-			PushBulletToken: "your pushbullet token", DailyRewardHour: 23, FesTimeLeftMin: 10}}
-	f, _ := os.Create(file)
-	encoder := toml.NewEncoder(f)
-	err := encoder.Encode(config)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("can't find %s. generate sample config.\n", file)
-	fmt.Printf("please edit %s. And rerun\n", file)
-}
-
 var (
-	app         = kingpin.New("million-timer", "checker for IDOL M@STER MillionLIVE")
+	app = kingpin.New("million-timer", "checker for IDOL M@STER MillionLIVE")
 
 	web     = app.Command("web", "web server mode")
 	webPort = web.Flag("port", "httpd port").Default("5000").OverrideDefaultFromEnvar("PORT").Short('p').Int()
 
-	checker    = app.Command("check", "checker mode")
-	configFile = checker.Flag("config", "path to config").Default("config.toml").String()
-	silent     = checker.Flag("silent", "don't output").Short('s').Bool()
+	chk                = app.Command("check", "checker mode")
+	chkEmail           = chk.Flag("email", "your gree email").OverrideDefaultFromEnvar("MT_EMAIL").Required().String()
+	chkPassword        = chk.Flag("password", "your gree password").OverrideDefaultFromEnvar("MT_PASSWORD").Required().String()
+	chkPBToken         = chk.Flag("token", "your pushbullet token").OverrideDefaultFromEnvar("MT_PB_TOKEN").Required().String()
+	chkDailyRewardHour = chk.Flag("daily-reward-hour", "forget daily reward report hour").Default("23").OverrideDefaultFromEnvar("MT_DAILY_REWARD_HOUR").Int()
+	chkFesTimeLeftMin  = chk.Flag("fes-time-left-min", "report unfinish fes").Default("10").OverrideDefaultFromEnvar("MT_FES_TIME_LEFT_MIN").Int()
+	chkSilent          = chk.Flag("silent", "don't output").OverrideDefaultFromEnvar("MT_CHECK_SILENT").Short('s').Bool()
 )
 
 func main() {
@@ -53,33 +35,31 @@ func main() {
 
 	switch kingpin.MustParse(app.Parse(os.Args[1:])) {
 	case web.FullCommand():
-		http.HandleFunc("/", func (w http.ResponseWriter, r *http.Request) {
+		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "Hello")
 		})
 		err := http.ListenAndServe(fmt.Sprintf(":%d", *webPort), nil)
 		if err != nil {
 			panic(err)
 		}
-	case checker.FullCommand():
-		check();
+	case chk.FullCommand():
+		check()
 	}
 }
 
 func check() {
-	var config appConfig
-	_, err := toml.DecodeFile(*configFile, &config)
+	config := CheckerConfig{
+		PushBulletToken: *chkPBToken,
+		DailyRewardHour: *chkDailyRewardHour,
+		FesTimeLeftMin:  *chkFesTimeLeftMin,
+	}
+	bw := NewBrowser(*chkEmail, *chkPassword)
+	err := bw.Open("/mypage")
 	if err != nil {
-		if strings.Contains(err.Error(), "no such file or directory") {
-			genConfig(*configFile)
-			return
-		}
-		panic(err)
+		log.Fatal(err)
 	}
 
-	bw := NewBrowser(config.Email, config.Password)
-	bw.Open("/mypage")
-
-	checker := NewChecker(config.CheckerSetting, *silent)
+	checker := NewChecker(config, *chkSilent)
 	defer checker.Close()
 
 	err = checker.CheckElement(bw, "div.appeal-theater", "send theater notify",

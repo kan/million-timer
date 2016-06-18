@@ -36,10 +36,20 @@ func (b *Browser) login() error {
 	}
 
 	re := regexp.MustCompile(`var url = "([^"]+)";`)
-	matchs := re.FindSubmatch([]byte(b.Find("script").Text()))
-	err = b.Browser.Open(string(matchs[1]))
-	if err != nil {
-		return err
+	if matchs := re.FindSubmatch([]byte(b.Find("script").Text())); matchs != nil {
+		err = b.Browser.Open(string(matchs[1]))
+		if err != nil {
+			return err
+		}
+	} else {
+		fm, err = b.Browser.Form(`form[name="redirect"]`)
+		if err != nil {
+			return err
+		}
+		err = fm.Submit()
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -52,14 +62,17 @@ func (b *Browser) Open(path string) error {
 		return err
 	}
 
-	if m, _ := regexp.MatchString(`^https://id.gree.net/login`, b.Browser.Url().String()); m {
+	if m, _ := regexp.MatchString(`^https://id.gree.net/`, b.Browser.Url().String()); m {
 		err = b.login()
 		if err != nil {
 			return err
 		}
 	}
 
-	fm, _ := b.Browser.Form("form")
+	fm, err := b.Browser.Form("form")
+	if err != nil {
+		return nil
+	}
 	err = fm.Submit()
 	if err != nil {
 		return err
