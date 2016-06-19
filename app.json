@@ -1,0 +1,26 @@
+{
+    "name": "Million Timer",
+    "description": "某ソシャゲの時間回復系をチェックしてくれるやつ。通知はPushbullet",
+    "repository": "https://github.com/kan/million-timer",
+    "env": {
+        "MT_EMAIL": {
+            "description": "gree mail address",
+            "value": ""
+        },
+        "MT_PASSWORD": {
+            "description": "gree password",
+            "value": ""
+        },
+        "MT_PB_TOKEN": {
+            "description": "Pushbullet API token",
+            "value": ""
+        }
+    },
+    "addons": [
+        "rediscloud:30",
+        "scheduler:standard"
+    ],
+    "buildpacks": [
+        { "url": "https://github.com/kr/heroku-buildpack-go.git" }
+    ]
+}
