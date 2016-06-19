@@ -1,0 +1,90 @@
+{
+	"ImportPath": "github.com/kan/million-timer",
+	"GoVersion": "go1.6",
+	"GodepVersion": "v74",
+	"Deps": [
+		{
+			"ImportPath": "github.com/PuerkitoBio/goquery",
+			"Comment": "v0.3.2-79-gb444041",
+			"Rev": "b4440419d81240f8451a505b2f806c853bc2befc"
+		},
+		{
+			"ImportPath": "github.com/alecthomas/template",
+			"Rev": "a0175ee3bccc567396460bf5acd36800cb10c49c"
+		},
+		{
+			"ImportPath": "github.com/alecthomas/template/parse",
+			"Rev": "a0175ee3bccc567396460bf5acd36800cb10c49c"
+		},
+		{
+			"ImportPath": "github.com/alecthomas/units",
+			"Rev": "2efee857e7cfd4f3d0138cc3cbb1b4966962b93a"
+		},
+		{
+			"ImportPath": "github.com/andybalholm/cascadia",
+			"Rev": "3ad29d1ad1c4f2023e355603324348cf1f4b2d48"
+		},
+		{
+			"ImportPath": "github.com/bitly/go-simplejson",
+			"Comment": "v0.4.3-30-g18db6e6",
+			"Rev": "18db6e68d8fd9cbf2e8ebe4c81a78b96fd9bf05a"
+		},
+		{
+			"ImportPath": "github.com/garyburd/redigo/internal",
+			"Comment": "v1.0.0-1-gb8dc900",
+			"Rev": "b8dc90050f24c1a73a52f107f3f575be67b21b7c"
+		},
+		{
+			"ImportPath": "github.com/garyburd/redigo/redis",
+			"Comment": "v1.0.0-1-gb8dc900",
+			"Rev": "b8dc90050f24c1a73a52f107f3f575be67b21b7c"
+		},
+		{
+			"ImportPath": "github.com/headzoo/surf",
+			"Comment": "0.5.5",
+			"Rev": "d8c2ee11cb0d0f16eb1e58b68497058b580eada6"
+		},
+		{
+			"ImportPath": "github.com/headzoo/surf/agent",
+			"Comment": "0.5.5",
+			"Rev": "d8c2ee11cb0d0f16eb1e58b68497058b580eada6"
+		},
+		{
+			"ImportPath": "github.com/headzoo/surf/browser",
+			"Comment": "0.5.5",
+			"Rev": "d8c2ee11cb0d0f16eb1e58b68497058b580eada6"
+		},
+		{
+			"ImportPath": "github.com/headzoo/surf/errors",
+			"Comment": "0.5.5",
+			"Rev": "d8c2ee11cb0d0f16eb1e58b68497058b580eada6"
+		},
+		{
+			"ImportPath": "github.com/headzoo/surf/jar",
+			"Comment": "0.5.5",
+			"Rev": "d8c2ee11cb0d0f16eb1e58b68497058b580eada6"
+		},
+		{
+			"ImportPath": "github.com/headzoo/surf/util",
+			"Comment": "0.5.5",
+			"Rev": "d8c2ee11cb0d0f16eb1e58b68497058b580eada6"
+		},
+		{
+			"ImportPath": "github.com/xconstruct/go-pushbullet",
+			"Rev": "7701de4be0964342739f6626906fe3678a23c0f0"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html",
+			"Rev": "1bc0720082d79ce7ffc6ef6e523d00d46b0dee45"
+		},
+		{
+			"ImportPath": "golang.org/x/net/html/atom",
+			"Rev": "1bc0720082d79ce7ffc6ef6e523d00d46b0dee45"
+		},
+		{
+			"ImportPath": "gopkg.in/alecthomas/kingpin.v2",
+			"Comment": "v2.1.11",
+			"Rev": "8cccfa8eb2e3183254457fb1749b2667fbc364c7"
+		}
+	]
+}
