@@ -70,8 +70,14 @@ func check() {
 		log.Fatal(err)
 	}
 
-	err = checker.CheckElement(bw, "div.appeal-caravan", "send caravan notify",
-		"お仕事完了", "キャラバンのお仕事が完了しています")
+	err = checker.CheckElement(bw, `img[src="http://cdn.bn765.com/66f/ed0f9a38c2289ef0c3e44ac330a6dc3b20df133431a565312290c6b44fddb083?8a9a0804c3458dc7898adb5c5686d52f"]`, "send budokan notify",
+		"PR可能", "BrandNewStageのPRが可能です")
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	err = checker.CheckElement(bw, `img[src="http://cdn.bn765.com/740/4c0451a7eef6abf31efb2c54ec72bc6845c5a93401c0519f608e1e199cf62b6b?81baa2ea232a2db783aa17ae01358cc7"]`, "send budokan notify",
+		"PR活動完了", "BrandNewStageのPRが完了しています")
 	if err != nil {
 		log.Fatal(err)
 	}
